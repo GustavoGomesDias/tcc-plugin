@@ -5,6 +5,9 @@ from transformers import RobertaConfig, RobertaModel, RobertaTokenizer
 
 """
     https://github.com/microsoft/CodeBERT
+    
+    Modelo pré-treinado:
+        https://code-summary.s3.amazonaws.com/pytorch_model.bin
 """
 
 if __name__ == '__main__':
