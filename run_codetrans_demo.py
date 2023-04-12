@@ -41,7 +41,12 @@ def example_python(device_):
 
     # code = 'def add_tensors(t, t1) -> Any:\n    return t + t1'
     # code = 'def sum(x, y):\n    return x + y'
-    code = 'def f(numbers, n):\n  if n not in numbers:\n  numbers.append(n)'
+    # code = 'def f(numbers, n):\n  if n not in numbers:\n  numbers.append(n)'
+    code = """class DBConnectionError(Exception):
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.error_name = 'ConnectionError'"""
 
     tokenized_code = python_tokenizer(code)
 

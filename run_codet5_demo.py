@@ -24,9 +24,15 @@ if __name__ == '__main__':
     # code = "def greet(user): print(f'hello <extra_id_0>!')"
     # code = 'def add_tensors(t, t1) -> Any:    return t + t1'
     # code = 'def sum(x, y):\n    return x + y'
-    code = 'def f(numbers, n):\n  if n not in numbers:\n  numbers.append(n)'
+    # code = 'def f(numbers, n):\n  if n not in numbers:\n  numbers.append(n)'
     # code = "protected String renderUri(URI uri){\n  return uri.toASCIIString();\n}\n"
     # code = 'public int mult(int x, int y) {\n  return x * y;\n}'
+
+    code = """class DBConnectionError(Exception):
+
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.error_name = 'ConnectionError'"""
 
     input_ids = tokenizer(code, return_tensors='pt').input_ids
 
