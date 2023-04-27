@@ -28,8 +28,8 @@ if __name__ == '__main__':
 
         buffer = io.StringIO(code)
 
-        for _, tok, _, _, _ in tokenize.generate_tokens(buffer.readline):
-            print(f'  Tokens: {tok}')
+        for type_, tok, _, _, _ in tokenize.generate_tokens(buffer.readline):
+            print(f'  Tokens: {type_} - {tok}')
 
     print('\n\n---------------- Java ----------------\n')
 
@@ -42,4 +42,4 @@ if __name__ == '__main__':
         tokens = list(javalang.tokenizer.tokenize(code, ignore_errors=True))
 
         for token in tokens:
-            print(f'  Tokens: {token.value}')
+            print(f'  Tokens: {token}')
