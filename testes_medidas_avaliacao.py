@@ -1,10 +1,14 @@
 from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor
+import nltk
 
 """
     https://medium.com/explorations-in-language-and-learning/metrics-for-nlg-evaluation-c89b6a781054
 """
 
 if __name__ == '__main__':
+
+    nltk.download('punkt')
+    nltk.download('wordnet')
 
     max_desc_len = 50
 
