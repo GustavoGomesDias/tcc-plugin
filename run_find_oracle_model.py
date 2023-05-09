@@ -1,8 +1,10 @@
 import json
 import sys
+import os
 
 from tqdm import tqdm
-
+from pathlib import Path
+from helpers import return_full_path
 
 if __name__ == '__main__':
 
@@ -10,15 +12,14 @@ if __name__ == '__main__':
     lang = 'python'
 
     # corpus_name = 'huetal'
-    corpus_name = 'codexglue'
-    # corpus_name = 'wanetal'
+    # corpus_name = 'codexglue'
+    corpus_name = 'wanetal'
 
     measure_name = 'rougel_f'
     # measure_name = 'meteor_score'
     # measure_name = 'bleu_4_o'
 
-    systems_descs_path = f'/media/hilario/Novo volume/Hilario/Pesquisa/Experimentos/tcc_gustavo/' \
-                         f'descriptions_json/{lang}/{corpus_name}/{corpus_name}.json'
+    systems_descs_path = return_full_path(f'descriptions_json/{lang}/{corpus_name}/{corpus_name}.json')
 
     with open(systems_descs_path) as data_file:
         all_data = json.load(data_file)

@@ -4,9 +4,9 @@ import sys
 
 from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor
 from src.evaluation_measures.bleu import compute_maps, bleu_from_maps
-from tqdm import tqdm
 from src.utils import corpora
-
+from tqdm import tqdm
+from helpers import return_full_path
 
 if __name__ == '__main__':
 
@@ -14,26 +14,23 @@ if __name__ == '__main__':
     lang = 'python'
 
     # corpus_name = 'huetal'
-    # corpus_name = 'codexglue'
-    corpus_name = 'wanetal'
+    corpus_name = 'codexglue'
+    # corpus_name = 'wanetal'
 
     preproc_config = 'none'
 
     if lang == 'java':
         preproc_config = 'camelsnakecase'
 
-    systems_dir = f'/media/hilario/Novo volume/Hilario/Pesquisa/Experimentos/tcc_gustavo/descriptions/' \
-                  f'{lang}/{corpus_name}'
+    systems_dir = return_full_path(f'descriptions/{lang}/{corpus_name}')
 
-    json_desc_dir = f'/media/hilario/Novo volume/Hilario/Pesquisa/Experimentos/tcc_gustavo/' \
-                    f'descriptions_json/{lang}/{corpus_name}'
+    json_desc_dir = return_full_path(f'descriptions_json/{lang}/{corpus_name}')
 
     size_threshold = -1
 
     max_desc_len = 20
 
-    test_file_path = f'/media/hilario/Novo volume/Hilario/Pesquisa/Experimentos/tcc_gustavo/corpora/{lang}/' \
-                     f'{corpus_name}/test_{preproc_config}.csv'
+    test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/test_{preproc_config}.csv')
 
     _, _, test_data = corpora.read_corpus_csv(test_file_path=test_file_path, sample_size=size_threshold)
 
