@@ -4,7 +4,7 @@ import os
 
 from tqdm import tqdm
 from pathlib import Path
-from helpers import return_full_path
+from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 

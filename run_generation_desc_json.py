@@ -1,15 +1,17 @@
 import os
 import json
 import sys
+import logging
 
-from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor
+from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor, compute_bert_score
 from src.evaluation_measures.bleu import compute_maps, bleu_from_maps
 from src.utils import corpora
 from tqdm import tqdm
-from helpers import return_full_path
+from src.utils.helpers import return_full_path
+
+logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
 
 if __name__ == '__main__':
-
     # lang = 'java'
     lang = 'python'
 
@@ -73,6 +75,8 @@ if __name__ == '__main__':
 
                 meteor_score = compute_meteor(ref_desc_tokens, tokens_desc)
 
+                P, R, F = compute_bert_score(ref_desc, sys_desc)
+
                 measures = {}
 
                 for rouge_n, metrics in rouge_scores.items():
@@ -83,6 +87,11 @@ if __name__ == '__main__':
 
                 measures['meteor_score'] = meteor_score
                 measures['bleu_4'] = bleu_4
+                measures['bert_score'] = {
+                    'P': P,
+                    'R': R,
+                    'F': F
+                }
 
                 gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
 

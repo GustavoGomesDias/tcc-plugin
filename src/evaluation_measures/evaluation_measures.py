@@ -1,12 +1,17 @@
 from rouge import Rouge
+from bert_score import BERTScorer
 from nltk.translate.meteor_score import single_meteor_score
 from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
 
 
 """
     https://github.com/Diego999/py-rouge
-"""
 
+    Bert Score
+    https://github.com/Tiiiger/bert_score
+    https://arxiv.org/pdf/1904.09675.pdf
+    https://pypi.org/project/bert-score/
+"""
 
 def compute_rouge(reference, candidate, max_len, use_stemming=True, max_ngram=2):
     evaluator = Rouge(metrics=['rouge-n', 'rouge-l'], max_n=max_ngram, limit_length=True, length_limit=max_len,
@@ -23,3 +28,8 @@ def compute_bleu(reference_, candidate):
 
 def compute_meteor(tokens_reference, tokens_candidate):
     return single_meteor_score(tokens_reference, tokens_candidate)
+
+def compute_bert_score(tokens_reference: str, tokens_candidate: str):
+    score =  BERTScorer(lang="en", batch_size=3)
+    P, R, F = score.score(cands=[tokens_candidate], refs=[tokens_reference])
+    return P.numpy()[0], R.numpy()[0], F.numpy()[0]
