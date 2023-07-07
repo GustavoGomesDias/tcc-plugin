@@ -19,6 +19,29 @@ if __name__ == '__main__':
         'getSC(phrase2, phrase1)) / 2.0;'
     ]
 
+    """
+        Características para extrair do código:
+            
+            1. Total de tokens;
+            2. Dicionário com os tipos de tokens possíveis como chave e a frequência no código como valor;
+                {
+                    tipo_1: freq_1,
+                    tipo_2: freq_2,
+                    ...,
+                    tipo_n: freq_n
+                }            
+    
+        T1: Eu adorei o filme ontem ==> Positivo
+        T2. Não gostei do filme     ==> Negativo
+        
+        Vocabulário: [eu, adorei, o, filme, ontem, nao, gostei, do]
+        
+        Bag of words:
+        
+            T1: [1,1,1,1,1,0,0,0]
+            T2: [0,0,0,1,0,1,1,1]
+    """
+
     print('\n\n---------------- Python ----------------\n')
 
     for code in codes_python:
@@ -29,7 +52,9 @@ if __name__ == '__main__':
 
         buffer = io.StringIO(code)
 
-        for token in tokenize.generate_tokens(buffer.readline):
+        tokens = tokenize.generate_tokens(buffer.readline)
+
+        for token in tokens:
             token_type = tok_name[token.type]
             print(f'  Tokens: {token_type} - {token.string} - {token.start} - {token.end}')
 
