@@ -9,7 +9,9 @@ from src.utils import corpora
 from tqdm import tqdm
 from src.utils.helpers import return_full_path
 
-logging.getLogger("transformers.modeling_utils").setLevel(logging.ERROR)
+
+logging.getLogger('transformers.modeling_utils').setLevel(logging.ERROR)
+
 
 if __name__ == '__main__':
     # lang = 'java'

@@ -1,6 +1,7 @@
 import javalang
 import io
 import tokenize
+from token import tok_name
 
 
 if __name__ == '__main__':
@@ -28,8 +29,9 @@ if __name__ == '__main__':
 
         buffer = io.StringIO(code)
 
-        for type_, tok, _, _, _ in tokenize.generate_tokens(buffer.readline):
-            print(f'  Tokens: {type_} - {tok}')
+        for token in tokenize.generate_tokens(buffer.readline):
+            token_type = tok_name[token.type]
+            print(f'  Tokens: {token_type} - {token.string} - {token.start} - {token.end}')
 
     print('\n\n---------------- Java ----------------\n')
 
