@@ -16,7 +16,7 @@ logging.getLogger('transformers.modeling_utils').setLevel(logging.ERROR)
 
 # TODO: talvez seja necessário ajeitar os paths nas linhas 32, 34 e 40
 
-def generate_description(lang):
+def generate_description(lang, test_mode = False):
     # corpus_name = 'huetal'
     corpus_name = 'codexglue'
     # corpus_name = 'wanetal'
@@ -53,15 +53,19 @@ def generate_description(lang):
     print(f'\nTotal of Systems: {len(sys_descriptions)}\n')
 
     data = []
+    tokenize_service = Tokenize(language)
 
     # with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
 
     for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
 
+        token_count = tokenize_service.count_token_type([code])
+
         dict_example = {
             'id': i + 1,
             'code': code,
-            'ref_desc': ref_desc
+            'ref_desc': ref_desc,
+            'tokenTypeFrequency': token_count
         }
 
         ref_desc_tokens = ref_desc.split(' ')
@@ -93,9 +97,9 @@ def generate_description(lang):
             measures['meteor_score'] = meteor_score
             measures['bleu_4'] = bleu_4
             measures['bert_score'] = {
-                'P': P,
-                'R': R,
-                'F': F
+                'P': float(P),
+                'R': float(R),
+                'F': float(F)
             }
 
             gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
@@ -103,27 +107,23 @@ def generate_description(lang):
             bleu_scores = bleu_from_maps(gold_map, prediction_map)
 
             measures['bleu_4_o'] = bleu_scores[0] / 100
-
-            tokenize_service = Tokenize(language)
-
-            token_count = tokenize_service.count_token_type([code])
-
             system_dict = {
                 'name': sys_name,
                 'description': sys_desc,
                 'measures': measures,
-                'tokenTypeFrequency': token_count
             }
 
             systems_descs.append(system_dict)
 
         dict_example['systems'] = systems_descs
-
         data.append(dict_example)
+
+        if test_mode and i == 5: break
+
+        print(i)
 
         # pbar.update(1)
 
     json_path = os.path.join(json_desc_dir, corpus_name + '.json')
-
     with open(json_path, 'w') as file:
         json.dump(data, file)
