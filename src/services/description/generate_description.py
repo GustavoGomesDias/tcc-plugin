@@ -59,13 +59,13 @@ def generate_description(lang, test_mode = False):
 
     for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
 
-        token_count = tokenize_service.count_token_type([code])
+        features = tokenize_service.count_token_type([code])
 
         dict_example = {
             'id': i + 1,
             'code': code,
             'ref_desc': ref_desc,
-            'tokenTypeFrequency': token_count
+            'features': features
         }
 
         ref_desc_tokens = ref_desc.split(' ')
