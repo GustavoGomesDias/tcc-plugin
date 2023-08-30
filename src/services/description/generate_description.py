@@ -126,4 +126,4 @@ def generate_description(lang, test_mode = False):
 
     json_path = os.path.join(json_desc_dir, corpus_name + '.json')
     with open(json_path, 'w') as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=4)
