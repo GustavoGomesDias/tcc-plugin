@@ -53,12 +53,11 @@ def generate_description(lang, test_mode = False):
     print(f'\nTotal of Systems: {len(sys_descriptions)}\n')
 
     data = []
-    tokenize_service = Tokenize(language)
 
     # with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
 
     for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
-
+        tokenize_service = Tokenize(language)
         features = tokenize_service.count_token_type([code])
 
         dict_example = {
@@ -118,7 +117,7 @@ def generate_description(lang, test_mode = False):
         dict_example['systems'] = systems_descs
         data.append(dict_example)
 
-        if test_mode and i == 5: break
+        if test_mode and i == 100: break
 
         print(i)
 
