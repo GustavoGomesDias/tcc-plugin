@@ -10,16 +10,20 @@ from tqdm import tqdm
 from src.utils.helpers import return_full_path
 from src.services.tokens.Tokenize import Tokenize
 from src.utils.types.Language import Language
+from src.services.description.get_better_result import get_better_result_and_features
 
 
 logging.getLogger('transformers.modeling_utils').setLevel(logging.ERROR)
 
 # TODO: talvez seja necessário ajeitar os paths nas linhas 32, 34 e 40
 
-def generate_description(lang, test_mode = False):
+def generate_description(lang, sorted_measure = 'meteor_score', test_mode = False, corpus_name = 'codexglue'):
     # corpus_name = 'huetal'
-    corpus_name = 'codexglue'
     # corpus_name = 'wanetal'
+    # corpus_name = 'codexglue'
+
+    if not lang or not corpus_name:
+        raise Exception('Necessário passar a linguagem e a base dos dados.')
 
     preproc_config = 'none'
 
@@ -53,6 +57,7 @@ def generate_description(lang, test_mode = False):
     print(f'\nTotal of Systems: {len(sys_descriptions)}\n')
 
     data = []
+    data_experiment = []
 
     # with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
 
@@ -65,6 +70,10 @@ def generate_description(lang, test_mode = False):
             'code': code,
             'ref_desc': ref_desc,
             'features': features
+        }
+
+        dict_experiment = {
+            'id': i + 1,
         }
 
         ref_desc_tokens = ref_desc.split(' ')
@@ -95,11 +104,11 @@ def generate_description(lang, test_mode = False):
 
             measures['meteor_score'] = meteor_score
             measures['bleu_4'] = bleu_4
-            measures['bert_score'] = {
-                'P': float(P),
-                'R': float(R),
-                'F': float(F)
-            }
+
+            measures['bert_score_p'] = float(P)
+            measures['bert_score_r'] = float(R)
+            measures['bert_score_f'] = float(F)
+
 
             gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
 
@@ -115,14 +124,21 @@ def generate_description(lang, test_mode = False):
             systems_descs.append(system_dict)
 
         dict_example['systems'] = systems_descs
+
+        experiment  = get_better_result_and_features(dict_example, sorted_measure)
+
+        dict_experiment['experiment'] = experiment
+        data_experiment.append(dict_experiment)
         data.append(dict_example)
 
-        if test_mode and i == 100: break
-
-        print(i)
+        if test_mode and i == 1: break
 
         # pbar.update(1)
 
     json_path = os.path.join(json_desc_dir, corpus_name + '.json')
+    json_path_exp = os.path.join(json_desc_dir, corpus_name + '-exp.json')
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
+
+    with open(json_path_exp, 'w') as file_exp:
+        json.dump(data_experiment, file_exp, indent=4)

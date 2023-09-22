@@ -1,0 +1,66 @@
+[
+    {
+        "id": 1,
+        "experiment": [
+            {
+                "LexerError": 0,
+                "Position": 0,
+                "JavaToken": 0,
+                "EndOfInput": 0,
+                "Keyword": 11,
+                "Modifier": 4,
+                "BasicType": 1,
+                "Literal": 0,
+                "Integer": 0,
+                "DecimalInteger": 0,
+                "OctalInteger": 0,
+                "BinaryInteger": 0,
+                "HexInteger": 0,
+                "FloatingPoint": 0,
+                "DecimalFloatingPoint": 0,
+                "HexFloatingPoint": 0,
+                "Boolean": 0,
+                "Character": 0,
+                "String": 0,
+                "Null": 0,
+                "Separator": 64,
+                "Operator": 12,
+                "Annotation": 0,
+                "Identifier": 55
+            },
+            "codetrans_mt_tf_base_camelsnakecase_loss_ft"
+        ]
+    },
+    {
+        "id": 2,
+        "experiment": [
+            {
+                "LexerError": 0,
+                "Position": 0,
+                "JavaToken": 0,
+                "EndOfInput": 0,
+                "Keyword": 6,
+                "Modifier": 2,
+                "BasicType": 0,
+                "Literal": 0,
+                "Integer": 0,
+                "DecimalInteger": 0,
+                "OctalInteger": 0,
+                "BinaryInteger": 0,
+                "HexInteger": 0,
+                "FloatingPoint": 0,
+                "DecimalFloatingPoint": 0,
+                "HexFloatingPoint": 0,
+                "Boolean": 0,
+                "Character": 0,
+                "String": 0,
+                "Null": 1,
+                "Separator": 28,
+                "Operator": 10,
+                "Annotation": 2,
+                "Identifier": 42
+            },
+            "codet5_base_camelsnakecase_loss_ft"
+        ]
+    }
+]
