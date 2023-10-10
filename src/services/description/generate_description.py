@@ -10,14 +10,13 @@ from tqdm import tqdm
 from src.utils.helpers import return_full_path
 from src.services.tokens.Tokenize import Tokenize
 from src.utils.types.Language import Language
-from src.services.description.get_better_result import get_better_result_and_features
 
 
 logging.getLogger('transformers.modeling_utils').setLevel(logging.ERROR)
 
 # TODO: talvez seja necessário ajeitar os paths nas linhas 32, 34 e 40
 
-def generate_description(lang, sorted_measure = 'meteor_score', test_mode = False, corpus_name = 'codexglue'):
+def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
     # corpus_name = 'huetal'
     # corpus_name = 'wanetal'
     # corpus_name = 'codexglue'
@@ -57,88 +56,79 @@ def generate_description(lang, sorted_measure = 'meteor_score', test_mode = Fals
     print(f'\nTotal of Systems: {len(sys_descriptions)}\n')
 
     data = []
-    data_experiment = []
 
-    # with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
+    with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
 
-    for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
-        tokenize_service = Tokenize(language)
-        features = tokenize_service.count_token_type([code])
+        for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
+            tokenize_service = Tokenize(language)
+            features = tokenize_service.count_token_type([code])
 
-        dict_example = {
-            'id': i + 1,
-            'code': code,
-            'ref_desc': ref_desc,
-            'features': features
-        }
-
-        dict_experiment = {
-            'id': i + 1,
-        }
-
-        ref_desc_tokens = ref_desc.split(' ')
-
-        systems_descs = []
-
-        for sys_name in sys_descriptions.keys():
-
-            sys_desc = sys_descriptions[sys_name][i]
-
-            tokens_desc = sys_desc.split(' ')
-
-            rouge_scores = compute_rouge(ref_desc, sys_desc, max_desc_len)
-
-            bleu_4 = compute_bleu(ref_desc, sys_desc)
-
-            meteor_score = compute_meteor(ref_desc_tokens, tokens_desc)
-
-            P, R, F = compute_bert_score(ref_desc, sys_desc)
-
-            measures = {}
-
-            for rouge_n, metrics in rouge_scores.items():
-                rouge_n = rouge_n.replace('-', '')
-                for metric, value in metrics.items():
-                    metric_name = f'{rouge_n}_{metric}'
-                    measures[metric_name] = value
-
-            measures['meteor_score'] = meteor_score
-            measures['bleu_4'] = bleu_4
-
-            measures['bert_score_p'] = float(P)
-            measures['bert_score_r'] = float(R)
-            measures['bert_score_f'] = float(F)
-
-
-            gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
-
-            bleu_scores = bleu_from_maps(gold_map, prediction_map)
-
-            measures['bleu_4_o'] = bleu_scores[0] / 100
-            system_dict = {
-                'name': sys_name,
-                'description': sys_desc,
-                'measures': measures,
+            dict_example = {
+                'id': i + 1,
+                'code': code,
+                'ref_desc': ref_desc,
+                'features': features
             }
 
-            systems_descs.append(system_dict)
+            dict_experiment = {
+                'id': i + 1,
+            }
 
-        dict_example['systems'] = systems_descs
+            ref_desc_tokens = ref_desc.split(' ')
 
-        experiment  = get_better_result_and_features(dict_example, sorted_measure)
+            systems_descs = []
 
-        dict_experiment['experiment'] = experiment
-        data_experiment.append(dict_experiment)
-        data.append(dict_example)
+            for sys_name in sys_descriptions.keys():
 
-        if test_mode and i == 1: break
+                sys_desc = sys_descriptions[sys_name][i]
 
-        # pbar.update(1)
+                tokens_desc = sys_desc.split(' ')
+
+                rouge_scores = compute_rouge(ref_desc, sys_desc, max_desc_len)
+
+                bleu_4 = compute_bleu(ref_desc, sys_desc)
+
+                meteor_score = compute_meteor(ref_desc_tokens, tokens_desc)
+
+                P, R, F = compute_bert_score(ref_desc, sys_desc)
+
+                measures = {}
+
+                for rouge_n, metrics in rouge_scores.items():
+                    rouge_n = rouge_n.replace('-', '')
+                    for metric, value in metrics.items():
+                        metric_name = f'{rouge_n}_{metric}'
+                        measures[metric_name] = value
+
+                measures['meteor_score'] = meteor_score
+                measures['bleu_4'] = bleu_4
+
+                measures['bert_score_p'] = float(P)
+                measures['bert_score_r'] = float(R)
+                measures['bert_score_f'] = float(F)
+
+
+                gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
+
+                bleu_scores = bleu_from_maps(gold_map, prediction_map)
+
+                measures['bleu_4_o'] = bleu_scores[0] / 100
+                system_dict = {
+                    'name': sys_name,
+                    'description': sys_desc,
+                    'measures': measures,
+                }
+
+                systems_descs.append(system_dict)
+
+            dict_example['systems'] = systems_descs
+
+            data.append(dict_example)
+
+            if test_mode and i == 5: break
+
+            pbar.update(1)
 
     json_path = os.path.join(json_desc_dir, corpus_name + '.json')
-    json_path_exp = os.path.join(json_desc_dir, corpus_name + '-exp.json')
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
-
-    with open(json_path_exp, 'w') as file_exp:
-        json.dump(data_experiment, file_exp, indent=4)
