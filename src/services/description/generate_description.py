@@ -3,7 +3,8 @@ import json
 import sys
 import logging
 
-from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor, compute_bert_score
+from src.evaluation_measures.evaluation_measures import (compute_rouge, compute_bleu,
+                                                         compute_meteor, compute_bert_score)
 from src.evaluation_measures.bleu import compute_maps, bleu_from_maps
 from src.utils import corpora
 from tqdm import tqdm
@@ -16,10 +17,8 @@ logging.getLogger('transformers.modeling_utils').setLevel(logging.ERROR)
 
 # TODO: talvez seja necessário ajeitar os paths nas linhas 32, 34 e 40
 
-def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
-    # corpus_name = 'huetal'
-    # corpus_name = 'wanetal'
-    # corpus_name = 'codexglue'
+
+def generate_description(lang, test_mode=False, corpus_name='codexglue'):
 
     if not lang or not corpus_name:
         raise Exception('Necessário passar a linguagem e a base dos dados.')
@@ -60,7 +59,9 @@ def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
     with tqdm(total=len(codes), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
 
         for i, (code, ref_desc) in enumerate(zip(codes, descriptions)):
+
             tokenize_service = Tokenize(language)
+
             features = tokenize_service.count_token_type([code])
 
             dict_example = {
@@ -68,10 +69,6 @@ def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
                 'code': code,
                 'ref_desc': ref_desc,
                 'features': features
-            }
-
-            dict_experiment = {
-                'id': i + 1,
             }
 
             ref_desc_tokens = ref_desc.split(' ')
@@ -90,7 +87,7 @@ def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
 
                 meteor_score = compute_meteor(ref_desc_tokens, tokens_desc)
 
-                P, R, F = compute_bert_score(ref_desc, sys_desc)
+                # precision, recall, f_score = compute_bert_score(ref_desc, sys_desc)
 
                 measures = {}
 
@@ -103,16 +100,16 @@ def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
                 measures['meteor_score'] = meteor_score
                 measures['bleu_4'] = bleu_4
 
-                measures['bert_score_p'] = float(P)
-                measures['bert_score_r'] = float(R)
-                measures['bert_score_f'] = float(F)
-
+                # measures['bert_score_p'] = float(precision)
+                # measures['bert_score_r'] = float(recall)
+                # measures['bert_score_f'] = float(f_score)
 
                 gold_map, prediction_map = compute_maps([sys_desc], [ref_desc])
 
                 bleu_scores = bleu_from_maps(gold_map, prediction_map)
 
                 measures['bleu_4_o'] = bleu_scores[0] / 100
+
                 system_dict = {
                     'name': sys_name,
                     'description': sys_desc,
@@ -125,10 +122,12 @@ def generate_description(lang, test_mode = False, corpus_name = 'codexglue'):
 
             data.append(dict_example)
 
-            if test_mode and i == 5: break
+            if test_mode and i == 5:
+                break
 
             pbar.update(1)
 
     json_path = os.path.join(json_desc_dir, corpus_name + '.json')
+
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
