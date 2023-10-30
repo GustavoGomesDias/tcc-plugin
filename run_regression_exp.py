@@ -15,6 +15,8 @@ from src.meta_model.meta_utils import evaluate
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from scipy.stats import pearsonr, kendalltau
 
+from src.utils.helpers import return_full_path
+
 
 if __name__ == '__main__':
 
@@ -45,14 +47,14 @@ if __name__ == '__main__':
         print('ERROR "lang option" INVALID!')
         exit(-1)
 
-    gen_desc_dir = f'descriptions/{lang}/{corpus_name}'
-    results_dir = f'results/{lang}/{corpus_name}'
+    gen_desc_dir = return_full_path(f'new_experiment/descriptions/{lang}/{corpus_name}')
+    results_dir = return_full_path(f'new_experiment/results/{lang}/{corpus_name}')
 
     os.makedirs(gen_desc_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)
 
-    test_path = f'features_files/{lang}/{corpus_name}/{corpus_name}_features.json'
-    train_path = f'features_files/{lang}/{train_corpus_name}/{train_corpus_name}_features.json'
+    test_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/{corpus_name}_features.json')
+    train_path = return_full_path(f'new_experiment/features_files/{lang}/{train_corpus_name}/{train_corpus_name}_features.json')
 
     corpus_data = read_data(test_path)
     train_data = read_data(train_path)

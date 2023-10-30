@@ -20,10 +20,12 @@ from sklearn.metrics import classification_report
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.pipeline import Pipeline
 
+from src.utils.helpers import return_full_path
+
 
 if __name__ == '__main__':
 
-    json_files_dir = 'descriptions_json/'
+    json_files_dir = return_full_path('new_experiment/descriptions_json/')
     sorted_measure = 'rougel_f'
 
     datasets = [
@@ -107,4 +109,4 @@ if __name__ == '__main__':
 
             clf_report = classification_report(y_pred, y_test)
 
-            print(f'\n\t\t\tEvaluation Report: {clf_report}')
+            print(f'\n\t\t\tEvaluation Report\n: {clf_report}')

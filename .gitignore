@@ -6,3 +6,5 @@ descriptions_json
 corpora
 
 resource/
+new_experiment/*
+catboost_info

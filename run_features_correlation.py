@@ -4,6 +4,8 @@ from src.meta_model.meta_utils import read_data, build_regression_data
 from sklearn.preprocessing import MinMaxScaler
 from yellowbrick.target import FeatureCorrelation
 
+from src.utils.helpers import return_full_path
+
 
 if __name__ == '__main__':
 
@@ -18,7 +20,7 @@ if __name__ == '__main__':
     # eval_measure = 'bleu_4_o'
     # eval_measure = 'meteor_score'
 
-    corpus_path = f'features_files/{lang}/{corpus_name}/{corpus_name}_features.json'
+    corpus_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/{corpus_name}_features.json')
 
     corpus_data = read_data(corpus_path)
 
