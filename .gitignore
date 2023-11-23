@@ -8,3 +8,6 @@ corpora
 resource/
 new_experiment/*
 catboost_info
+**/deprecated/**
+
+test.*
