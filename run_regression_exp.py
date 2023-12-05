@@ -47,8 +47,8 @@ if __name__ == '__main__':
         print('ERROR "lang option" INVALID!')
         exit(-1)
 
-    gen_desc_dir = return_full_path(f'new_experiment/descriptions/{lang}/{corpus_name}')
-    results_dir = return_full_path(f'new_experiment/results/{lang}/{corpus_name}')
+    gen_desc_dir = return_full_path(f'new_experiment/meta_descriptions/{lang}/{corpus_name}')
+    results_dir = return_full_path(f'new_experiment/meta_results/{lang}/{corpus_name}')
 
     os.makedirs(gen_desc_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)

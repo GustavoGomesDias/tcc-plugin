@@ -7,6 +7,7 @@ def make_report(file_path: str):
 
     with open(return_full_path('new_experiment/reports/regression_result.csv'), 'a', newline='') as file:
         writer = csv.writer(file)
+        writer.writerow([f"{file_path}"])
         writer.writerow(['Algoritmo', 'RMSE', 'MAE', 'Person'])
         for reg_name in data.keys():
             rmse = data[reg_name]['rmse']
