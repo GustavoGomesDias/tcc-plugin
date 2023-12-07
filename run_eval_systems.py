@@ -6,6 +6,7 @@ from src.utils import utils
 from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor
 from tqdm import tqdm
 from src.evaluation_measures.bleu import compute_maps, bleu_from_maps
+from src.utils.helpers import return_full_path
 
 
 if __name__ == '__main__':
@@ -19,17 +20,17 @@ if __name__ == '__main__':
 
     preproc_config = 'none'
 
-    kind = 'related_works'
+    # kind = 'related_works' 
     # kind = 'fine_tuning'
 
-    systems_dir = f'../../resources/{kind}/descriptions/{lang}/{corpus_name}'
-    results_dir = f'../../resources/{kind}/results/{lang}/{corpus_name}'
+    systems_dir = return_full_path(f'descriptions/{lang}/{corpus_name}')
+    results_dir = return_full_path(f'experiment_csv/results/{lang}/{corpus_name}')
 
     size_threshold = -1
 
     max_desc_len = 20
 
-    test_file_path = f'../../resources/corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv'
+    test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv')
 
     _, _, test_data = utils.read_corpus_csv(test_file_path=test_file_path, sample_size=size_threshold)
 
