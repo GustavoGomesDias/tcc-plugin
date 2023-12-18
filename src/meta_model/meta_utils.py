@@ -217,55 +217,34 @@ def extract_features(test_data, train_data, eval_measure, max_desc_len):
 
 
 def evaluate(corpus_data, regressor, scaler, eval_measure):
-
     all_real_scores = []
     all_pred_scores = []
-
     mean_real_score = 0
-
     selected_descriptions = []
-
     for example in corpus_data:
-
         predictions = []
-
         for system_data in example['systems']:
-
             if system_data['features']['len_desc'] > 0:
-
                 features = []
-
                 for feature_name, feature_value in system_data['features'].items():
                     features.append(feature_value)
-
                 features = scaler.transform([features])
-
                 y_pred = regressor.predict(features)[0]
-
                 y_true = system_data['measures'][eval_measure]
-
                 predictions.append((y_pred, y_true, system_data['desc']))
-
                 all_real_scores.append(y_true)
                 all_pred_scores.append(y_pred)
-
         predictions.sort(key=lambda x: x[0], reverse=True)
-
         selected_system = predictions[0]
-
         mean_real_score += selected_system[1]
-
         selected_descriptions.append(selected_system[2])
-
     mean_real_score /= len(corpus_data)
-
     dict_eval = {
         'real_scores': all_real_scores,
         'pred_scores': all_pred_scores,
         'mean_real_score': mean_real_score,
         'selected_descriptions': selected_descriptions
     }
-
     return dict_eval
 
 

@@ -11,26 +11,23 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    # lang = 'java'
-    lang = 'python'
+    lang = 'java'
+    # lang = 'python'
 
-    # corpus_name = 'huetal'
+    corpus_name = 'huetal'
     # corpus_name = 'codexglue'
-    corpus_name = 'wanetal'
+    # corpus_name = 'wanetal'
 
     preproc_config = 'none'
-
-    # kind = 'related_works' 
-    # kind = 'fine_tuning'
 
     systems_dir = return_full_path(f'descriptions/{lang}/{corpus_name}')
     results_dir = return_full_path(f'experiment_csv/results/{lang}/{corpus_name}')
 
+    test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv')
+
     size_threshold = -1
 
     max_desc_len = 20
-
-    test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv')
 
     _, _, test_data = utils.read_corpus_csv(test_file_path=test_file_path, sample_size=size_threshold)
 
@@ -90,13 +87,18 @@ if __name__ == '__main__':
                 else:
                     system_results['bleu_4'] = [bleu_score]
 
+                gold_map, prediction_map = compute_maps([sys_desc], [ref_sys])
+
+                bleu_scores = bleu_from_maps(gold_map, prediction_map)
+
+                bleu_4_o = bleu_scores[0] / 100
+
+                if 'bleu_4_o' in system_results:
+                    system_results['bleu_4_o'].append(bleu_4_o)
+                else:
+                    system_results['bleu_4_o'] = [bleu_4_o]
+
                 pbar.update(1)
-
-            gold_map, prediction_map = compute_maps(sys_descs, test_descs)
-
-            bleu_scores = bleu_from_maps(gold_map, prediction_map)
-
-            system_results['bleu_4_o'] = [bleu_scores[0] / 100]
 
             all_results[sys_name] = system_results
 
@@ -117,7 +119,7 @@ if __name__ == '__main__':
             report += ';' + str(np.mean(values)).replace('.', ',') + ';' + \
                       str(np.std(values)).replace('.', ',')
 
-    report_file = os.path.join(results_dir, f'{corpus_name}_results_report.csv')
+    report_file = os.path.join(results_dir, corpus_name + '_results_report.csv')
 
     with open(report_file, 'w') as file:
         file.write(report)
