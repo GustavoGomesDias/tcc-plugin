@@ -9,6 +9,7 @@ resource/
 new_experiment/*
 experiment_csv/*
 catboost_info
+desc_regression
 **/deprecated/**
 
 test.*
