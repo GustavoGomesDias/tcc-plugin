@@ -14,10 +14,6 @@ if __name__ == '__main__':
     # corpus_name = 'codexglue'
     corpus_name = 'wanetal'
 
-    eval_measure = 'rougel_f'
-    # eval_measure = 'meteor_score'
-    # eval_measure = 'bleu_4_o'
-
     train_corpus_name = None
 
     if lang == 'java':
@@ -51,7 +47,7 @@ if __name__ == '__main__':
 
     extract_features(test_data, train_data, max_desc_len=20)
 
-    json_path = os.path.join(features_dir, f'{corpus_name}_{eval_measure}_features.json')
+    json_path = os.path.join(features_dir, f'{corpus_name}_features.json')
 
     with open(json_path, 'w') as file:
         json.dump(test_data, file, indent=4)

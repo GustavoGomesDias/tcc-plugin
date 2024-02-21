@@ -47,4 +47,12 @@ if __name__ == '__main__':
 
     """
         Gerar um CSV com os resultados os testes estatísticos cada sistema vs os outros sistemas.
+        
+        	A	     B	      C
+        A	1	   0.001	0.02
+        B	0.001	1	0.07
+        C	0.02	0.07	1
+        
+        os valores das células são os statistical_test.pvalue
     """
+
