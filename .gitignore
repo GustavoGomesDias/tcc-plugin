@@ -12,3 +12,5 @@ catboost_info
 **/deprecated/**
 
 test.*
+
+new_experiment/

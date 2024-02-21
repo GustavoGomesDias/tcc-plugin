@@ -11,19 +11,20 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    lang = 'java'
-    # lang = 'python'
+    # lang = 'java'
+    lang = 'python'
 
-    corpus_name = 'huetal'
+    # corpus_name = 'huetal'
     # corpus_name = 'codexglue'
-    # corpus_name = 'wanetal'
+    corpus_name = 'wanetal'
 
     preproc_config = 'none'
 
-    systems_dir = return_full_path(f'descriptions/{lang}/{corpus_name}')
-    results_dir = return_full_path(f'experiment_csv/results/{lang}/{corpus_name}')
+    systems_dir = return_full_path(f'new_experiment/meta_descriptions/{lang}/{corpus_name}')
+    results_dir = return_full_path(f'new_experiment/meta_results/{lang}/{corpus_name}')
 
-    test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv')
+    test_file_path = return_full_path(f'new_experiment/corpora/{lang}/{corpus_name}/csv/'
+                                      f'test_{preproc_config}.csv')
 
     size_threshold = -1
 
@@ -53,7 +54,8 @@ if __name__ == '__main__':
 
         print()
 
-        with tqdm(total=len(test_descs), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
+        with tqdm(total=len(test_descs), file=sys.stdout, colour='blue',
+                  desc='  Evaluating ') as pbar:
 
             for sys_desc, ref_sys in zip(sys_descs, test_descs):
 
@@ -102,8 +104,8 @@ if __name__ == '__main__':
 
             all_results[sys_name] = system_results
 
-    metrics_columns = ['rouge1_r', 'rouge1_p', 'rouge1_f', 'rouge2_r', 'rouge2_p', 'rouge2_f', 'rougel_r',
-                       'rougel_p', 'rougel_f', 'meteor_score', 'bleu_4', 'bleu_4_o']
+    metrics_columns = ['rouge1_r', 'rouge1_p', 'rouge1_f', 'rouge2_r', 'rouge2_p', 'rouge2_f',
+                       'rougel_r', 'rougel_p', 'rougel_f', 'meteor_score', 'bleu_4', 'bleu_4_o']
 
     report = 'system'
 
