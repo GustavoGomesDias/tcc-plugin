@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+import json
 
 from src.utils import utils
 from src.evaluation_measures.evaluation_measures import compute_rouge, compute_bleu, compute_meteor
@@ -11,12 +12,12 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    # lang = 'java'
-    lang = 'python'
+    lang = 'java'
+    # lang = 'python'
 
-    # corpus_name = 'huetal'
+    corpus_name = 'huetal'
     # corpus_name = 'codexglue'
-    corpus_name = 'wanetal'
+    # corpus_name = 'wanetal'
 
     preproc_config = 'none'
 
@@ -116,12 +117,21 @@ if __name__ == '__main__':
 
         report += '\n' + system_name
 
+        dict_system_results = {}
+
         for metric in metrics_columns:
+
             values = results[metric]
+
             report += ';' + str(np.mean(values)).replace('.', ',') + ';' + \
                       str(np.std(values)).replace('.', ',')
 
-    report_file = os.path.join(results_dir, corpus_name + '_results_report.csv')
+    json_path = os.path.join(results_dir, f'{corpus_name}_results.json')
+
+    with open(json_path, 'w') as file:
+        json.dump(all_results, file, indent=4)
+
+    report_file = os.path.join(results_dir,  f'{corpus_name}_results_report.csv')
 
     with open(report_file, 'w') as file:
         file.write(report)

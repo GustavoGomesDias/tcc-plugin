@@ -25,7 +25,7 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    json_files_dir = return_full_path('new_experiment/descriptions_json/')
+    json_files_dir = return_full_path('../../new_experiment/descriptions_json/')
     sorted_measure = 'rougel_f'
 
     datasets = [
