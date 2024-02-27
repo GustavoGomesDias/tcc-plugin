@@ -22,6 +22,6 @@ with pd.ExcelWriter(excel_file_path, engine='xlsxwriter', mode='w') as writer:
                 try:
                     df = pd.read_csv(csv_file_path, sep=';')
                     
-                    df.to_excel(writer, sheet_name=sheet_name, index=False, columns=['system', 'mean_rouge1_f', 'std_rouge1_f', 'mean_meteor_score', 'std_meteor_score', 'mean_bleu_4_o', 'std_bleu_4_o'])
+                    df.to_excel(writer, sheet_name=sheet_name, index=False, columns=['system', 'mean_rougel_f', 'std_rougel_f', 'mean_meteor_score', 'std_meteor_score', 'mean_bleu_4_o', 'std_bleu_4_o'])
                 except Exception as e:
                     print(e)
