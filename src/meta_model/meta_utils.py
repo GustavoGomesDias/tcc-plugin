@@ -1,9 +1,7 @@
 import json
 import re
 import sys
-import numpy as np
 
-from collections import Counter
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from rouge import Rouge
@@ -35,46 +33,25 @@ def compute_rouge(reference, candidate, max_len, use_stemming=True, max_ngram=2)
     return rouge_scores
 
 
-def process_data(train_data, eval_measure):
-    all_tokens = []
-    all_words = []
+def process_data(train_data):
     all_descs = []
-    dict_systems = {}
     for data in train_data:
-        code = data['code']
-        tokens_code = [t for t in code.split() if len(t) > 1]
-        all_tokens.extend(tokens_code)
         for system_data in data['systems']:
             desc = system_data['description']
             desc = re.sub(r'[^\w\s]', '', desc)
             all_descs.append(desc)
-            tokens_desc = [t for t in desc.split() if len(t) > 1]
-            all_words.extend(tokens_desc)
-            system_name = system_data['name']
-            system_name = system_name.replace('_ft', '')
-            system_name = system_name.replace('_loss', '')
-            system_name = system_name.replace('_bleu', '')
-            eval_value = system_data['measures'][eval_measure]
-            if system_name in dict_systems:
-                dict_systems[system_name].append(eval_value)
-            else:
-                dict_systems[system_name] = [eval_value]
-    dict_systems = {k: np.mean(v) for k, v in dict_systems.items()}
-    dict_tokens = Counter(all_tokens)
-    dict_words = Counter(all_words)
     tfidf_vectorizer = TfidfVectorizer()
     binary_vectorizer = CountVectorizer(binary=True)
     count_vectorizer = CountVectorizer(binary=False)
     tfidf_vectorizer.fit(all_descs)
     binary_vectorizer.fit(all_descs)
     count_vectorizer.fit(all_descs)
-    return dict_tokens, dict_words, dict_systems, tfidf_vectorizer, binary_vectorizer, count_vectorizer
+    return tfidf_vectorizer, binary_vectorizer, count_vectorizer
 
 
-def extract_features(test_data, train_data, eval_measure, max_desc_len):
+def extract_features(test_data, train_data, max_desc_len):
 
-    dict_tokens, dict_words, dict_systems, tfidf_vectorizer, binary_vectorizer, \
-        count_vectorizer = process_data(train_data, eval_measure)
+    tfidf_vectorizer, binary_vectorizer, count_vectorizer = process_data(train_data)
 
     with tqdm(total=len(test_data), file=sys.stdout, colour='red', desc='Extracting features') as pbar:
 
@@ -85,13 +62,6 @@ def extract_features(test_data, train_data, eval_measure, max_desc_len):
             tokens_code = [t for t in code.split() if len(t) > 1]
 
             len_code = len(tokens_code)
-
-            tokens_freq = 0
-
-            for token in tokens_code:
-                tokens_freq += dict_tokens[token] if token in dict_tokens else 0
-
-            tokens_freq /= len(tokens_code)
 
             for system_data in data['systems']:
 
@@ -160,33 +130,10 @@ def extract_features(test_data, train_data, eval_measure, max_desc_len):
                         mean_cosine_sim_binary /= (len(data['systems']) - 1)
                         mean_cosine_sim_count /= (len(data['systems']) - 1)
 
-                    words_freq = 0
-
-                    for word in words_desc:
-                        words_freq += dict_words[word] if word in dict_tokens else 0
-
-                    words_freq /= len(words_desc)
-
-                    system_name = system_data['name']
-
-                    system_name = system_name.replace('_ft', '')
-                    system_name = system_name.replace('_loss', '')
-                    system_name = system_name.replace('_bleu', '')
-                    system_name = system_name.replace('pre_', '')
-                    system_name = system_name.replace('_rougel', '')
-                    system_name = system_name.replace('_codexglue', '')
-                    system_name = system_name.replace('codet5_camelsnakecase', 'codet5_base_camelsnakecase')
-                    system_name = system_name.replace('codet5_none', 'codet5_base_none')
-
-                    mean_previous_eval = dict_systems[system_name]
-
                     features = {
                         'len_code': len_code,
                         'len_desc': len_desc,
                         'ratio_len': ratio_len,
-                        'tokens_freq': tokens_freq,
-                        'words_freq': words_freq,
-                        'mean_previous_eval': mean_previous_eval,
                         'mean_jacc_sim': mean_jacc_sim,
                         'mean_cosine_sim_tfidf': mean_cosine_sim_tfidf,
                         'mean_cosine_sim_binary': mean_cosine_sim_binary,
@@ -217,55 +164,35 @@ def extract_features(test_data, train_data, eval_measure, max_desc_len):
 
 
 def evaluate(corpus_data, regressor, scaler, eval_measure):
-
     all_real_scores = []
     all_pred_scores = []
-
     mean_real_score = 0
-
     selected_descriptions = []
-
     for example in corpus_data:
-
         predictions = []
-
         for system_data in example['systems']:
-
             if system_data['features']['len_desc'] > 0:
-
                 features = []
-
                 for feature_name, feature_value in system_data['features'].items():
-                    features.append(feature_value)
-
+                    if feature_name not in ['mean_previous_eval', 'tokens_freq', 'words_freq']:
+                        features.append(feature_value)
                 features = scaler.transform([features])
-
                 y_pred = regressor.predict(features)[0]
-
                 y_true = system_data['measures'][eval_measure]
-
-                predictions.append((y_pred, y_true, system_data['desc']))
-
+                predictions.append((y_pred, y_true, system_data['description']))
                 all_real_scores.append(y_true)
                 all_pred_scores.append(y_pred)
-
         predictions.sort(key=lambda x: x[0], reverse=True)
-
         selected_system = predictions[0]
-
         mean_real_score += selected_system[1]
-
         selected_descriptions.append(selected_system[2])
-
     mean_real_score /= len(corpus_data)
-
     dict_eval = {
         'real_scores': all_real_scores,
         'pred_scores': all_pred_scores,
         'mean_real_score': mean_real_score,
         'selected_descriptions': selected_descriptions
     }
-
     return dict_eval
 
 
@@ -279,7 +206,8 @@ def build_regression_data(corpus_data, eval_measure_name):
             eval_measure_score = system_data['measures'][eval_measure_name]
             features = []
             for feature_name, feature_value in system_data['features'].items():
-                features.append(feature_value)
+                if feature_name not in ['mean_previous_eval', 'tokens_freq', 'words_freq']:
+                    features.append(feature_value)
             features_corpus.append(features)
             eval_scores_corpus.append(eval_measure_score)
     return features_corpus, eval_scores_corpus

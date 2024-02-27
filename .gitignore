@@ -13,3 +13,5 @@ desc_regression
 **/deprecated/**
 
 test.*
+
+new_experiment/

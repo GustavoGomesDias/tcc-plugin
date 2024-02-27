@@ -20,16 +20,15 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    lang = 'java'
-    # lang = 'python'
+    # lang = 'java'
+    lang = 'python'
 
-    corpus_name = 'huetal'
+    # corpus_name = 'huetal'
     # corpus_name = 'codexglue'
-    # corpus_name = 'wanetal'
+    corpus_name = 'wanetal'
 
-    eval_measure = 'rougel_f'
-    # eval_measure = 'meteor_score'
-    # eval_measure = 'bleu_4_o'
+    # eval_measure = 'rougel_f'
+    eval_measure = 'bleu_4_o'
 
     train_corpus_name = None
 
@@ -53,20 +52,22 @@ if __name__ == '__main__':
     os.makedirs(gen_desc_dir, exist_ok=True)
     os.makedirs(results_dir, exist_ok=True)
 
-    test_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/{corpus_name}_features.json')
-    train_path = return_full_path(f'new_experiment/features_files/{lang}/{train_corpus_name}/{train_corpus_name}_features.json')
+    test_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/'
+                                 f'{corpus_name}_features.json')
+    train_path = return_full_path(f'new_experiment/features_files/{lang}/{train_corpus_name}/'
+                                  f'{train_corpus_name}_features.json')
 
-    corpus_data = read_data(test_path)
+    test_data = read_data(test_path)
     train_data = read_data(train_path)
 
-    print(f'\nTest Corpus: {corpus_name} - {len(corpus_data)} - {eval_measure}')
+    print(f'\nTest Corpus: {lang} - {corpus_name} - {len(test_data)} - {eval_measure}')
 
     train_features, train_scores = build_regression_data(train_data, eval_measure)
 
     # train_features = train_features[:100]
     # train_scores = train_scores[:100]
 
-    print(f'\nTrain Corpus: {train_corpus_name} - {len(train_data)} -- {len(train_features)}')
+    print(f'\nTrain Corpus: {lang} - {train_corpus_name} - {len(train_data)} -- {len(train_features)}')
 
     scaler = MinMaxScaler()
 
@@ -81,8 +82,8 @@ if __name__ == '__main__':
         'LGBMRegressor': LGBMRegressor(random_state=42),
         'XGBRegressor':  XGBRegressor(n_estimators=100, n_jobs=-1, random_state=42),
         'CatBoostRegressor': CatBoostRegressor(verbose=0, n_estimators=100),
-        'RandomForestRegressor': RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42),
-        'MLP Regressor': MLPRegressor(max_iter=1000, random_state=42)
+        # 'RandomForestRegressor': RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42),
+        # 'MLP Regressor': MLPRegressor(max_iter=1000, random_state=42)
     }
 
     print(f'\nEvaluation: {len(train_features[0])}')
@@ -95,7 +96,7 @@ if __name__ == '__main__':
 
         regressor.fit(train_features, train_scores)
 
-        dict_eval = evaluate(corpus_data, regressor, scaler, eval_measure)
+        dict_eval = evaluate(test_data, regressor, scaler, eval_measure)
 
         all_real_scores = dict_eval['real_scores']
         all_pred_scores = dict_eval['pred_scores']
