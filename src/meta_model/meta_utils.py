@@ -171,6 +171,7 @@ def evaluate(corpus_data, regressor, scaler, eval_measure):
     for example in corpus_data:
         predictions = []
         for system_data in example['systems']:
+            print(system_data)
             if system_data['features']['len_desc'] > 0:
                 features = []
                 for feature_name, feature_value in system_data['features'].items():

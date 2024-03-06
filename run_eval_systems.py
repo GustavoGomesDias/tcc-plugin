@@ -12,28 +12,29 @@ from src.utils.helpers import return_full_path
 
 if __name__ == '__main__':
 
-    lst_corpus = ['huetal', 'codexglue', 'wanetal']
-    lst_lang = ['java', 'python']
 
-    for lang in lst_lang:
-        for corpus_name in lst_corpus:
+    langs = ['python', 'java']
 
+    corpus_names = ['wanetal', 'huetal', 'codexglue']    
+
+    for lang in langs:
+        print(f'Lang: {lang}')
+        for corpus_name in corpus_names:
+            print(f'corpus_name: {corpus_name}')
             if lang == 'java' and corpus_name == 'wanetal': continue
             if lang == 'python' and corpus_name == 'huetal': continue
 
             preproc_config = 'none'
 
-            # kind = 'related_works' 
-            # kind = 'fine_tuning'
-
             systems_dir = return_full_path(f'new_experiment/meta_descriptions/{lang}/{corpus_name}')
-            results_dir = return_full_path(f'experiment_csv/results/{lang}/{corpus_name}')
-            print(systems_dir)
+            results_dir = return_full_path(f'new_experiment/meta_results/{lang}/{corpus_name}')
+
+            test_file_path = return_full_path(f'new_experiment/corpora/{lang}/{corpus_name}/csv/'
+                                            f'test_{preproc_config}.csv')
+
             size_threshold = -1
 
             max_desc_len = 20
-
-            test_file_path = return_full_path(f'corpora/{lang}/{corpus_name}/csv/test_{preproc_config}.csv')
 
             _, _, test_data = utils.read_corpus_csv(test_file_path=test_file_path, sample_size=size_threshold)
 
@@ -59,7 +60,8 @@ if __name__ == '__main__':
 
                 print()
 
-                with tqdm(total=len(test_descs), file=sys.stdout, colour='blue', desc='  Evaluating ') as pbar:
+                with tqdm(total=len(test_descs), file=sys.stdout, colour='blue',
+                        desc='  Evaluating ') as pbar:
 
                     for sys_desc, ref_sys in zip(sys_descs, test_descs):
 
@@ -93,18 +95,23 @@ if __name__ == '__main__':
                         else:
                             system_results['bleu_4'] = [bleu_score]
 
+                        gold_map, prediction_map = compute_maps([sys_desc], [ref_sys])
+
+                        bleu_scores = bleu_from_maps(gold_map, prediction_map)
+
+                        bleu_4_o = bleu_scores[0] / 100
+
+                        if 'bleu_4_o' in system_results:
+                            system_results['bleu_4_o'].append(bleu_4_o)
+                        else:
+                            system_results['bleu_4_o'] = [bleu_4_o]
+
                         pbar.update(1)
-
-                    gold_map, prediction_map = compute_maps(sys_descs, test_descs)
-
-                    bleu_scores = bleu_from_maps(gold_map, prediction_map)
-
-                    system_results['bleu_4_o'] = [bleu_scores[0] / 100]
 
                     all_results[sys_name] = system_results
 
-            metrics_columns = ['rouge1_r', 'rouge1_p', 'rouge1_f', 'rouge2_r', 'rouge2_p', 'rouge2_f', 'rougel_r',
-                            'rougel_p', 'rougel_f', 'meteor_score', 'bleu_4', 'bleu_4_o']
+            metrics_columns = ['rouge1_r', 'rouge1_p', 'rouge1_f', 'rouge2_r', 'rouge2_p', 'rouge2_f',
+                            'rougel_r', 'rougel_p', 'rougel_f', 'meteor_score', 'bleu_4', 'bleu_4_o']
 
             report = 'system'
 
@@ -115,12 +122,21 @@ if __name__ == '__main__':
 
                 report += '\n' + system_name
 
+                dict_system_results = {}
+
                 for metric in metrics_columns:
+
                     values = results[metric]
+
                     report += ';' + str(np.mean(values)).replace('.', ',') + ';' + \
                             str(np.std(values)).replace('.', ',')
 
-            report_file = os.path.join(results_dir, f'{corpus_name}_results_report.csv')
+            json_path = os.path.join(results_dir, f'{corpus_name}_results.json')
+
+            with open(json_path, 'w') as file:
+                json.dump(all_results, file, indent=4)
+
+            report_file = os.path.join(results_dir,  f'{corpus_name}_results_report.csv')
 
             with open(report_file, 'w') as file:
                 file.write(report)
