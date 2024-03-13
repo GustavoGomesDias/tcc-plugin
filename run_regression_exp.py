@@ -32,109 +32,120 @@ if __name__ == '__main__':
 
     train_corpus_name = None
 
-    if lang == 'java':
-        if corpus_name == 'huetal':
-            train_corpus_name = 'codexglue'
-        else:
-            train_corpus_name = 'huetal'
-    elif lang == 'python':
-        if corpus_name == 'wanetal':
-            train_corpus_name = 'codexglue'
-        else:
-            train_corpus_name = 'wanetal'
-    else:
-        print('ERROR "lang option" INVALID!')
-        exit(-1)
+    langs = ['python', 'java']
 
-    gen_desc_dir = return_full_path(f'new_experiment/meta_descriptions/{lang}/{corpus_name}')
-    results_dir = return_full_path(f'new_experiment/meta_results/{lang}/{corpus_name}')
+    corpus_names = ['wanetal', 'huetal', 'codexglue']    
 
-    os.makedirs(gen_desc_dir, exist_ok=True)
-    os.makedirs(results_dir, exist_ok=True)
+    for lang in langs:
+        print(f'Lang: {lang}')
+        for corpus_name in corpus_names:
+            if lang == 'java' and corpus_name == 'wanetal': continue
+            if lang == 'python' and corpus_name == 'huetal': continue
 
-    test_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/'
-                                 f'{corpus_name}_features.json')
-    train_path = return_full_path(f'new_experiment/features_files/{lang}/{train_corpus_name}/'
-                                  f'{train_corpus_name}_features.json')
+            print(f'{lang} - {corpus_name}')
+            if lang == 'java':
+                if corpus_name == 'huetal':
+                    train_corpus_name = 'codexglue'
+                else:
+                    train_corpus_name = 'huetal'
+            elif lang == 'python':
+                if corpus_name == 'wanetal':
+                    train_corpus_name = 'codexglue'
+                else:
+                    train_corpus_name = 'wanetal'
+            else:
+                print('ERROR "lang option" INVALID!')
+                exit(-1)
 
-    test_data = read_data(test_path)
-    train_data = read_data(train_path)
+            gen_desc_dir = return_full_path(f'new_experiment/meta_descriptions/{lang}/{corpus_name}')
+            results_dir = return_full_path(f'new_experiment/meta_results/{lang}/{corpus_name}')
 
-    print(f'\nTest Corpus: {lang} - {corpus_name} - {len(test_data)} - {eval_measure}')
+            os.makedirs(gen_desc_dir, exist_ok=True)
+            os.makedirs(results_dir, exist_ok=True)
 
-    train_features, train_scores = build_regression_data(train_data, eval_measure)
+            test_path = return_full_path(f'new_experiment/features_files/{lang}/{corpus_name}/'
+                                        f'{corpus_name}_features.json')
+            train_path = return_full_path(f'new_experiment/features_files/{lang}/{train_corpus_name}/'
+                                        f'{train_corpus_name}_features.json')
 
-    # train_features = train_features[:100]
-    # train_scores = train_scores[:100]
+            test_data = read_data(test_path)
+            train_data = read_data(train_path)
 
-    print(f'\nTrain Corpus: {lang} - {train_corpus_name} - {len(train_data)} -- {len(train_features)}')
+            print(f'\nTest Corpus: {lang} - {corpus_name} - {len(test_data)} - {eval_measure}')
 
-    scaler = MinMaxScaler()
+            train_features, train_scores = build_regression_data(train_data, eval_measure)
 
-    train_features = scaler.fit_transform(train_features)
+            # train_features = train_features[:100]
+            # train_scores = train_scores[:100]
 
-    regressors_dict = {
-        'Linear Regression': LinearRegression(n_jobs=-1),
-        'BayesianRidge': BayesianRidge(),
-        'Decision Tree Regressor': DecisionTreeRegressor(random_state=42),
-        'Linear SVM': LinearSVR(max_iter=1000, random_state=42),
-        'SVR': SVR(),
-        'LGBMRegressor': LGBMRegressor(random_state=42),
-        'XGBRegressor':  XGBRegressor(n_estimators=100, n_jobs=-1, random_state=42),
-        'CatBoostRegressor': CatBoostRegressor(verbose=0, n_estimators=100),
-        # 'RandomForestRegressor': RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42),
-        # 'MLP Regressor': MLPRegressor(max_iter=1000, random_state=42)
-    }
+            print(f'\nTrain Corpus: {lang} - {train_corpus_name} - {len(train_data)} -- {len(train_features)}')
 
-    print(f'\nEvaluation: {len(train_features[0])}')
+            scaler = MinMaxScaler()
 
-    dict_results = {}
+            train_features = scaler.fit_transform(train_features)
 
-    for reg_name, regressor in regressors_dict.items():
+            regressors_dict = {
+                'Linear Regression': LinearRegression(n_jobs=-1),
+                'BayesianRidge': BayesianRidge(),
+                'Decision Tree Regressor': DecisionTreeRegressor(random_state=42),
+                'Linear SVM': LinearSVR(max_iter=1000, random_state=42),
+                'SVR': SVR(),
+                'LGBMRegressor': LGBMRegressor(random_state=42),
+                'XGBRegressor':  XGBRegressor(n_estimators=100, n_jobs=-1, random_state=42),
+                'CatBoostRegressor': CatBoostRegressor(verbose=0, n_estimators=100),
+                # 'RandomForestRegressor': RandomForestRegressor(n_estimators=100, n_jobs=-1, random_state=42),
+                # 'MLP Regressor': MLPRegressor(max_iter=1000, random_state=42)
+            }
 
-        print(f'\n  {reg_name}')
+            print(f'\nEvaluation: {len(train_features[0])}')
 
-        regressor.fit(train_features, train_scores)
+            dict_results = {}
 
-        dict_eval = evaluate(test_data, regressor, scaler, eval_measure)
+            for reg_name, regressor in regressors_dict.items():
 
-        all_real_scores = dict_eval['real_scores']
-        all_pred_scores = dict_eval['pred_scores']
-        mean_real_score = dict_eval['mean_real_score']
-        selected_descriptions = dict_eval['selected_descriptions']
+                print(f'\n  {reg_name}')
 
-        rmse = mean_squared_error(all_real_scores, all_pred_scores, squared=False)
-        mae = mean_absolute_error(all_real_scores, all_pred_scores)
-        r2 = r2_score(all_real_scores, all_pred_scores)
-        pearson_corr = pearsonr(all_real_scores, all_pred_scores)
-        kendall_tau = kendalltau(all_real_scores, all_pred_scores)
+                regressor.fit(train_features, train_scores)
 
-        print(f'\n    Mean real score: {mean_real_score}')
+                dict_eval = evaluate(test_data, regressor, scaler, eval_measure)
 
-        print('    Mean RMSE:', rmse)
-        print('    Mean MAE:', mae)
-        print('    Mean R2 Score:', r2)
-        print('    Mean Pearson Correlation:', pearson_corr)
-        print('    Mean Kendall Tau:', kendall_tau)
+                all_real_scores = dict_eval['real_scores']
+                all_pred_scores = dict_eval['pred_scores']
+                mean_real_score = dict_eval['mean_real_score']
+                selected_descriptions = dict_eval['selected_descriptions']
 
-        dict_results[reg_name] = {
-            'rmse': rmse,
-            'mae': mae,
-            'r2': r2,
-            'pearson_corr': pearson_corr,
-            'kendall_tau': kendall_tau
-        }
+                rmse = mean_squared_error(all_real_scores, all_pred_scores, squared=False)
+                mae = mean_absolute_error(all_real_scores, all_pred_scores)
+                r2 = r2_score(all_real_scores, all_pred_scores)
+                pearson_corr = pearsonr(all_real_scores, all_pred_scores)
+                kendall_tau = kendalltau(all_real_scores, all_pred_scores)
 
-        file_desc_name = f'{reg_name}_{eval_measure}.txt'
+                print(f'\n    Mean real score: {mean_real_score}')
 
-        file_desc_name = file_desc_name.replace(' ', '_').lower()
+                print('    Mean RMSE:', rmse)
+                print('    Mean MAE:', mae)
+                print('    Mean R2 Score:', r2)
+                print('    Mean Pearson Correlation:', pearson_corr)
+                print('    Mean Kendall Tau:', kendall_tau)
 
-        generated_desc_file = os.path.join(gen_desc_dir, file_desc_name)
+                dict_results[reg_name] = {
+                    'rmse': rmse,
+                    'mae': mae,
+                    'r2': r2,
+                    'pearson_corr': pearson_corr,
+                    'kendall_tau': kendall_tau
+                }
 
-        with open(generated_desc_file, 'w') as file:
-            file.write('\n'.join(selected_descriptions))
+                file_desc_name = f'{reg_name}_{eval_measure}.txt'
 
-    results_file_path = os.path.join(results_dir, f'ml_{corpus_name}_{eval_measure}.json')
+                file_desc_name = file_desc_name.replace(' ', '_').lower()
 
-    with open(results_file_path, 'w') as fp:
-        json.dump(dict_results, fp, indent=4)
+                generated_desc_file = os.path.join(gen_desc_dir, file_desc_name)
+
+                with open(generated_desc_file, 'w') as file:
+                    file.write('\n'.join(selected_descriptions))
+
+            results_file_path = os.path.join(results_dir, f'ml_{lang}_{corpus_name}_{eval_measure}.json')
+
+            with open(results_file_path, 'w') as fp:
+                json.dump(dict_results, fp, indent=4)

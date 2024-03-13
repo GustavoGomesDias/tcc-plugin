@@ -18,3 +18,4 @@ new_experiment/
 new_exp_backup/
 corpora_old
 *.zip
+*.xlsx
